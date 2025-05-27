@@ -10,6 +10,8 @@ class SimpleBlog {
 	private $db;
 
 	private $dbPath;
+	private $rss;
+	private $rssFeedPath;
 
 	private $dateFormat = 'd F Y';
 
@@ -20,6 +22,7 @@ class SimpleBlog {
 	public function __construct($load) {
 		global $Wcms;
 		$this->dbPath = $Wcms->dataPath . '/simpleblog.json';
+		$this->rssFeedPath = $Wcms->rootDir . '/rss.xml';
 		if ($load) {
 			$this->Wcms =&$Wcms;
 		}
@@ -76,7 +79,52 @@ class SimpleBlog {
 	private function save(): void {
 		file_put_contents($this->dbPath,
 			json_encode($this->db, JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+		$this->gen_rss_feed();
 	}
+
+
+	private function gen_rss_feed(): void {
+		global $Wcms;
+		
+		$rss .= "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
+		$rss .= <<<RSS
+ 	<rss version="2.0"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+	> 
+RSS;
+		$rss .= "\n\t<channel>\n";
+		$rss .= "\t\t<title>" . $Wcms->get('config', 'siteTitle') . "</title>\n";
+		$rss .= "\t\t<link>". $Wcms->url($this->slug) ."</link>\n";
+		$rss .= "\t\t<description> Le blog de " . $Wcms->get('config', 'siteTitle') . "</description>\n";
+		$rss .= "<language>". $Wcms->get('config', 'siteLang') ."</language>\n";
+		$mydate=time();
+		$rss .= "<lastBuildDate>" . date("D, d M Y m:h:s",$mydate) . "</lastBuildDate>\n";
+
+		foreach (array_reverse((array) $this->db->posts, true) as $slug => $post){
+			$rss .= "\t\t\t<item>\n";
+			$rss .= "\t\t\t<title>\n \t\t\t " . htmlspecialchars($post->title, ENT_QUOTES) . "\n \t\t\t </title> \n";
+			$rss .= "\t\t\t<pubDate>" .  date("D, d M Y m:h:s", $post->date) . "</pubDate> \n";
+			$rss .= "\t\t\t <link>" . $Wcms->url($this->slug . '/' . $slug) . "</link>\n";
+                        $rss .= "\t\t\t <guid>" . $Wcms->url($this->slug . '/' . $slug) . "</guid>\n";
+			$rss .= "\t\t\t<description>\n" . htmlspecialchars($post->description, ENT_QUOTES). "\n</description>\n";
+			$rss .= "\t\t\t<content:encoded>\n \t\t\t" . htmlspecialchars($post->body, ENT_QUOTES) .  "\n\t\t\t</content:encoded>\n";
+			$rss .= "\n\t\t\t</item>\n";
+		
+		}
+
+
+		$rss .= "\t</channel>\n";
+		$rss .= "</rss>";
+
+
+		file_put_contents($this->rssFeedPath, $rss);
+
+}
+
 
 	public function set(): void {
 		$numArgs = func_num_args();
@@ -199,6 +247,7 @@ HTML;
 HTML;
 					}
 					break;
+
 				default:
 					if (isset($this->db->posts->{$this->path})) {
 						// Display post
