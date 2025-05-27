@@ -10,7 +10,7 @@ class SimpleBlog {
 	private $db;
 
 	private $dbPath;
-	private $rss;
+
 	private $rssFeedPath;
 
 	private $dateFormat = 'd F Y';
