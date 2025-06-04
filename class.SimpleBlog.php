@@ -10,7 +10,7 @@ class SimpleBlog {
 	private $db;
 
 	private $dbPath;
-
+	private $rss;
 	private $rssFeedPath;
 
 	private $dateFormat = 'd F Y';
@@ -87,16 +87,8 @@ class SimpleBlog {
 		global $Wcms;
 		
 		$rss .= "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
-		$rss .= <<<RSS
- 	<rss version="2.0"
-	xmlns:content="http://purl.org/rss/1.0/modules/content/"
-	xmlns:dc="http://purl.org/dc/elements/1.1/"
-	xmlns:atom="http://www.w3.org/2005/Atom"
-	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
-	xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
-	> 
-RSS;
-		$rss .= "\n\t<channel>\n";
+		$rss .= "<rss version=\"2.0\"   xmlns:content=\"http://purl.org/rss/2.0/modules/content/\">\n" ;
+		$rss .= "\t<channel>\n";
 		$rss .= "\t\t<title>" . $Wcms->get('config', 'siteTitle') . "</title>\n";
 		$rss .= "\t\t<link>". $Wcms->url($this->slug) ."</link>\n";
 		$rss .= "\t\t<description> Le blog de " . $Wcms->get('config', 'siteTitle') . "</description>\n";
@@ -106,13 +98,13 @@ RSS;
 
 		foreach (array_reverse((array) $this->db->posts, true) as $slug => $post){
 			$rss .= "\t\t\t<item>\n";
-			$rss .= "\t\t\t<title>\n \t\t\t " . htmlspecialchars($post->title, ENT_QUOTES) . "\n \t\t\t </title> \n";
+			$rss .= "\t\t\t<title>\n \t\t\t " . $post->title . "\n \t\t\t </title> \n";
 			$rss .= "\t\t\t<pubDate>" .  date("D, d M Y m:h:s", $post->date) . "</pubDate> \n";
 			$rss .= "\t\t\t <link>" . $Wcms->url($this->slug . '/' . $slug) . "</link>\n";
                         $rss .= "\t\t\t <guid>" . $Wcms->url($this->slug . '/' . $slug) . "</guid>\n";
-			$rss .= "\t\t\t<description>\n" . htmlspecialchars($post->description, ENT_QUOTES). "\n</description>\n";
-			$rss .= "\t\t\t<content:encoded>\n \t\t\t" . htmlspecialchars($post->body, ENT_QUOTES) .  "\n\t\t\t</content:encoded>\n";
-			$rss .= "\n\t\t\t</item>\n";
+			$rss .= "\t\t\t<description>\n" . $post->description . "</description>\n";
+			$rss .= "\t\t\t<content>\n \t\t\t" . $post->description .  "\n\t\t\t</content>\n";
+			$rss .= "\t\t\t</item>\n";
 		
 		}
 
@@ -225,6 +217,9 @@ HTML;
 					if ($this->Wcms->loggedIn) {
 						$args[0] = "<div class='text-right'><a href='#' class='btn btn-light' onclick='blog.new(); return false;'><span class='glyphicon glyphicon-plus-sign'></span> Create new post</a></div>";
 					}
+					
+					# Add Rss feed link
+					$args[0] .= "<div class='text-right'><a href='/rss.xml'> Suscribe to RSS feed</a></div>";
 
 					$args[0] .= <<<HTML
 HTML;
