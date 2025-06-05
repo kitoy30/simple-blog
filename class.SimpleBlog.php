@@ -12,7 +12,7 @@ class SimpleBlog {
 	private $dbPath;
 
 	private $rssFeedPath;
-
+	private $rssFeedName;
 	private $dateFormat = 'd F Y';
 
 	private $path = [''];
@@ -21,8 +21,10 @@ class SimpleBlog {
 
 	public function __construct($load) {
 		global $Wcms;
+
 		$this->dbPath = $Wcms->dataPath . '/simpleblog.json';
-		$this->rssFeedPath = $Wcms->rootDir . '/rss.xml';
+		$this->rssFeedName = 'rss-blog.xml';
+		$this->rssFeedPath = $Wcms->rootDir . '/' . $this->rssFeedName;
 		if ($load) {
 			$this->Wcms =&$Wcms;
 		}
@@ -226,7 +228,7 @@ HTML;
 						$args[0] = "<div class='text-right'><a href='#' class='btn btn-light' onclick='blog.new(); return false;'><span class='glyphicon glyphicon-plus-sign'></span> Create new post</a></div>";
 					}
 					// Add link for RSS feed
-					$args[0] .= "<div class='text-right'><a href='{$this->Wcms->url('rss.xml')}'> Subscribe to RSS feed</a></div>";
+					$args[0] .= "<div class='text-right'><a href='{$this->Wcms->url($this->rssFeedName)}'> Subscribe to RSS feed</a></div>";
 					$args[0] .= <<<HTML
 HTML;
 
