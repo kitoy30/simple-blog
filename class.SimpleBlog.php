@@ -226,7 +226,7 @@ HTML;
 						$args[0] = "<div class='text-right'><a href='#' class='btn btn-light' onclick='blog.new(); return false;'><span class='glyphicon glyphicon-plus-sign'></span> Create new post</a></div>";
 					}
 					// Add link for RSS feed
-					$args[0] .= "<div class='text-right'><a href='/rss.xml'> Suscribe to RSS feed</a></div>";
+					$args[0] .= "<div class='text-right'><a href='{$this->Wcms->url('rss.xml')}'> Subscribe to RSS feed</a></div>";
 					$args[0] .= <<<HTML
 HTML;
 
